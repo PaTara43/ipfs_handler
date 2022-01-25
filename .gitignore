@@ -4,3 +4,4 @@ __pycache__
 tests/testing_files/Qm*
 tests/testing_files/test_file_*
 tests/testing_files/folder*
+tests/.cache
