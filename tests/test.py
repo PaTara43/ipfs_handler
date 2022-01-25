@@ -16,6 +16,14 @@ path_folder = Path("./testing_files/folder")
 # print(res)
 
 file = IPFSHandler(path, True)
-print(file.file_path, file.password)
 
-print(file.upload_file())
+file_path = file.file_path
+password = file.password
+print(file_path)
+print(password)
+
+file_hash, gateway = file.upload_file()
+print(file_hash)
+print(gateway)
+
+file.delete_file(file_hash.replace('5', '4'))

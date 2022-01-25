@@ -25,12 +25,10 @@ class IPFSProto(ABC):
 
     @staticmethod
     @abstractmethod
-    def delete_file(_hash: str, path: Path = None) -> bool:
+    def delete_file(_hash: str) -> bool:
         """
         Удаляем файл с локальной ноды
         :param _hash: хэш файла в ipfs
-        :param path: путь к файлу на локальной машине (нужен ли он?
-        Или можно по хэшу достать расположение на локальной ноде?)
         :return флаг статуса операции
         """
         ...

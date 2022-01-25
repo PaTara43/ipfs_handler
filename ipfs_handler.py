@@ -11,11 +11,11 @@ from pathlib import Path
 
 class IPFSHandler(IPFSProto):
     def __init__(
-            self,
-            file_path: Path,
-            as_archive: bool,
-            password_protect: bool = True,
-            password_length: int = 8,
+        self,
+        file_path: Path,
+        as_archive: bool,
+        password_protect: bool = True,
+        password_length: int = 8,
     ):
         """
         Class for interacting with IPFS and `.zip` archives
@@ -47,21 +47,28 @@ class IPFSHandler(IPFSProto):
         return result
 
     @staticmethod
-    def delete_file(_hash: str, filepath: Path = None) -> bool:
+    def delete_file(file_hash: str) -> bool:
         """
-        Удаляем файл с локальной ноды
-        :param _hash: хэш файла в ipfs
-        :param filepath: путь к файлу на локальной машине (нужен ли он?
-        Или можно по хэшу достать расположение на локальной ноде?)
-        :return флаг статуса операции
+        Unpin and remove file from local node. Warning! This method collects garbage: all unpinned items will be removed
+
+        :param file_hash: IPFS file hash
+
+        :return success flag
         """
 
         client: ipfshttpclient.Client = ipfshttpclient.connect()  # Connects to: /dns/localhost/tcp/5001/http
-        client
+        try:
+            client.pin.rm(file_hash)  # unpins file
+            client.repo.gc()  # collects garbage (i.e. deletes unpinned)
+        except ipfshttpclient.exceptions.ErrorResponse:
+            return False
+
+        client.close()
+        return True
 
     @staticmethod
     def create_archive(
-            file_path: Path, password_protect: bool = True, password_length: int = 8
+        file_path: Path, password_protect: bool = True, password_length: int = 8
     ) -> tp.Tuple[Path, tp.Optional[str]]:
         """
         Create an optionally password protected `.zip` file of a single file/folder.
