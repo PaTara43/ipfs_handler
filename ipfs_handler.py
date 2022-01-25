@@ -21,7 +21,7 @@ class IPFSHandler(IPFSProto):
         Class for interacting with IPFS and `.zip` archives
 
         :param file_path: path to a target file/folder
-        :param as_archive: whether archive file/folder or nor
+        :param as_archive: whether archive file/folder or not
         :param password_protect: whether protect the archive with password or not
         :param password_length: if protected, set a password length. Password generally consists of small and capital
         latin letters and digits

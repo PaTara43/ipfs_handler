@@ -2,6 +2,7 @@ import sys
 
 sys.path.append("..")
 from ipfs_handler import IPFSHandler
+from test_archives import get_content_folder, get_content_single_file
 
 import ipfshttpclient
 from pathlib import Path
@@ -23,12 +24,7 @@ assert file_hash == "QmUphraLMyE7eJomLMiHdiWAAny1jhxW816UpGM2uTmpRA"
 assert gateway == "http://127.0.0.1:8080/ipfs/QmUphraLMyE7eJomLMiHdiWAAny1jhxW816UpGM2uTmpRA"
 client = ipfshttpclient.connect()
 client.get(file_hash, "./testing_files")
-# TODO
-# unarchive and read
-# with open(f"./testing_files/{file_hash}") as f:
-#     content = f.read()
-# print(content)
-
+assert get_content_single_file(f"./testing_files/{file_hash}", None) == "abc\nabc2\nabc3"
 
 # Folder with password (each time hash is different)
 file = IPFSHandler(path_folder, True)
@@ -43,11 +39,7 @@ folder_hash, gateway = file.upload_file()
 assert folder_hash == "QmfTJu84gjsFCYeUADaQyimsqA3yypTgtTq8TC7NLF8bxT"
 assert gateway == "http://127.0.0.1:8080/ipfs/QmfTJu84gjsFCYeUADaQyimsqA3yypTgtTq8TC7NLF8bxT"
 client.get(folder_hash, "./testing_files")
-# TODO
-# unarchive and read
-# with open(f"./testing_files/{file_hash}") as f:
-#     content = f.read()
-# print(content)
+assert get_content_folder(f"./testing_files/{file_hash}", None) == "acb\nacb1\nacb2"
 
 
 # Unpin and remove file from local IPFS node. Folder file no password
