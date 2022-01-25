@@ -8,10 +8,14 @@ from pathlib import Path
 
 path = Path("./testing_files/test_file.txt")
 path_folder = Path("./testing_files/folder")
+#
+# res = IPFSHandler.create_archive(path, password_protect=False)
+# print(res)
+#
+# res = IPFSHandler.create_archive(path_folder)
+# print(res)
 
-res = IPFSHandler.create_archive(path, password_protect=False)
-print(res)
+file = IPFSHandler(path, True)
+print(file.file_path, file.password)
 
-res = IPFSHandler.create_archive(path_folder)
-print(res)
-
+print(file.upload_file())

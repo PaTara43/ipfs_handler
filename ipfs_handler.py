@@ -1,3 +1,4 @@
+import ipfshttpclient
 import pyminizip
 import random
 import string
@@ -10,25 +11,40 @@ from pathlib import Path
 
 class IPFSHandler(IPFSProto):
     def __init__(
-        self,
-        filepath: Path,
-        as_archive: bool,
-        encrypt_archive: bool = True,
-        archive_key_length: int = 8,
+            self,
+            file_path: Path,
+            as_archive: bool,
+            password_protect: bool = True,
+            password_length: int = 8,
     ):
         """
-        Класс для работы с IPFS
-        :param filepath: Путь к папке, или файлу
-        :param as_archive: Запаковывать ли нам все это дело в архив
-        :param encrypt_archive:  Шифровать ли архив
-        :param archive_key_length: Длина ключа для архива по умолчанию
+        Class for interacting with IPFS and `.zip` archives
+
+        :param file_path: path to a target file/folder
+        :param as_archive: whether archive file/folder or nor
+        :param password_protect: whether protect the archive with password or not
+        :param password_length: if protected, set a password length. Password generally consists of small and capital
+        latin letters and digits
         """
 
-    def upload_file(self) -> (str, str):
+        if as_archive:
+            self.file_path, self.password = self.create_archive(file_path, password_protect, password_length)
+        else:
+            self.file_path = file_path
+
+    def upload_file(self) -> tp.Tuple[str, str]:
         """
-        :return кортеж из ссылки на файл в ipfs (по протоколу ipfs) и ссылки на файл через шлюз
+        add file to local IPFS node
+
+        :return tuple consisting of IPFS hash and gateway link to it
         """
-        ...
+
+        client: ipfshttpclient.Client = ipfshttpclient.connect()  # Connects to: /dns/localhost/tcp/5001/http
+        file_hash: str = client.add(str(self.file_path), recursive=True)["Hash"]
+        client.close()
+
+        result: tp.Tuple[str, str] = (file_hash, f"http://127.0.0.1:8080/ipfs/{file_hash}")
+        return result
 
     @staticmethod
     def delete_file(_hash: str, filepath: Path = None) -> bool:
@@ -39,11 +55,13 @@ class IPFSHandler(IPFSProto):
         Или можно по хэшу достать расположение на локальной ноде?)
         :return флаг статуса операции
         """
-        ...
+
+        client: ipfshttpclient.Client = ipfshttpclient.connect()  # Connects to: /dns/localhost/tcp/5001/http
+        client
 
     @staticmethod
     def create_archive(
-        file_path: Path, password_protect: bool = True, password_length: int = 8
+            file_path: Path, password_protect: bool = True, password_length: int = 8
     ) -> tp.Tuple[Path, tp.Optional[str]]:
         """
         Create an optionally password protected `.zip` file of a single file/folder.
