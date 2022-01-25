@@ -7,6 +7,8 @@ import pyminizip
 from pathlib import Path
 
 
+# TODO
+# unarchive and read
 def get_content_single_file(archive, archive_password):
     unzipped: Path = Path("./testing_files/test_file_unzipped.txt")
 
@@ -16,6 +18,8 @@ def get_content_single_file(archive, archive_password):
     return content_func
 
 
+# TODO
+# unarchive and read
 def get_content_folder(archive, archive_password):
     unzipped: Path = Path("./testing_files/folder_unzipped")
 
@@ -81,6 +85,7 @@ file_path = folder_no_pwd.file_path
 assert str(file_path) == "testing_files/folder.zip"
 password = folder_no_pwd.password
 assert password is None
+# print(get_content_folder(file_path, None))
 
 # Folder file no archive
 folder = IPFSHandler(path_folder, False)
