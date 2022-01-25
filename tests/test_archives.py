@@ -3,27 +3,33 @@ import sys
 sys.path.append("..")
 from ipfs_handler import IPFSHandler
 
+import os
 import pyminizip
+import shutil
+
 from pathlib import Path
 
 
-# TODO
-# unarchive and read
 def get_content_single_file(archive, archive_password):
-    unzipped: Path = Path("./testing_files/test_file_unzipped.txt")
+    pyminizip.uncompress(str(archive), archive_password, None, 0)
 
-    pyminizip.uncompress(str(archive), archive_password, str(unzipped), 0)
+    unzipped = Path("./testing_files/test_file_unzipped.txt")
+    shutil.move("./test_file.txt", unzipped)
+
     with open(unzipped) as f_func:
         content_func = f_func.read()
     return content_func
 
 
-# TODO
-# unarchive and read
 def get_content_folder(archive, archive_password):
-    unzipped: Path = Path("./testing_files/folder_unzipped")
+    pyminizip.uncompress(str(archive), archive_password, None, 0)
+    # pyminizip somehow unpacks content in a executing script folder only
 
-    pyminizip.uncompress(str(archive), archive_password, str(unzipped), 0)
+    unzipped = Path("./testing_files/folder_unzipped")
+    if os.path.exists(unzipped):
+        shutil.rmtree(unzipped)
+    shutil.move("./folder", unzipped)
+
     with open(f"{unzipped}/subfolder/test_file3.txt") as f_func:
         content_func = f_func.read()
     return content_func
@@ -40,7 +46,6 @@ if __name__ == "__main__":
     password = file_pwd_8.password
     assert len(password) == 8
     assert password.isalnum() is True
-    print(get_content_single_file(file_path, password))
     assert get_content_single_file(file_path, password) == "abc\nabc2\nabc3"
 
     # Single file archive with custom length password
