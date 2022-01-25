@@ -39,7 +39,7 @@ folder_hash, gateway = file.upload_file()
 assert folder_hash == "QmfTJu84gjsFCYeUADaQyimsqA3yypTgtTq8TC7NLF8bxT"
 assert gateway == "http://127.0.0.1:8080/ipfs/QmfTJu84gjsFCYeUADaQyimsqA3yypTgtTq8TC7NLF8bxT"
 client.get(folder_hash, "./testing_files")
-assert get_content_folder(f"./testing_files/{file_hash}", None) == "acb\nacb1\nacb2"
+assert get_content_folder(f"./testing_files/{folder_hash}", None) == "acb\nacb1\nacb2"
 
 
 # Unpin and remove file from local IPFS node. Folder file no password
