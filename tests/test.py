@@ -9,7 +9,7 @@ from pathlib import Path
 path = Path("./testing_files/test_file.txt")
 path_folder = Path("./testing_files/folder")
 
-res = IPFSHandler.create_archive(path)
+res = IPFSHandler.create_archive(path, password_protect=False)
 print(res)
 
 res = IPFSHandler.create_archive(path_folder)

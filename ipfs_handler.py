@@ -1,6 +1,7 @@
 import pyminizip
 import random
 import string
+import typing as tp
 
 from ipfs_proto import IPFSProto
 from os import path, walk
@@ -42,36 +43,65 @@ class IPFSHandler(IPFSProto):
 
     @staticmethod
     def create_archive(
-        filepath: Path, encrypt_archive: bool = True, archive_key_length: int = 8
-    ) -> (Path, str):
+        file_path: Path, password_protect: bool = True, password_length: int = 8
+    ) -> tp.Tuple[Path, tp.Optional[str]]:
         """
-        :return кортеж из пути к архиву и пароля от архива
+        Create an optionally password protected `.zip` file of a single file/folder.
+
+        :param file_path: absolute or relative path to a file/folder to be archived
+        :param password_protect: whether protect the archive with password or not
+        :param password_length: if protected, set a password length. Password generally consists of small and capital
+        latin letters and digits
+
+        :return: tuple with a new archive path (absolute/relative depends on the way `filepath` was passed) and password
+        (None if was not set to password protect)
         """
-        if not filepath.exists():
+
+        if not file_path.exists():
             raise FileNotFoundError
 
-        if filepath.is_dir():
-            archived_file, password = zip_folder(filepath, archive_key_length)
+        if file_path.is_dir():
+            archive, password = zip_folder(file_path, password_length if password_protect else None)
         else:
-            archived_file, password = zip_single_file(filepath, archive_key_length)
+            archive, password = zip_single_file(file_path, password_length if password_protect else None)
 
-        result = (archived_file, password)
+        result = (Path(archive), password)
 
         return result
 
 
-def zip_single_file(file_path, archive_key_length):
+def zip_single_file(file_path: Path, password_length: tp.Optional[int]) -> (str, tp.Optional[str]):
+    """
+    `.zip`-compress a single file with optional password protection.
+
+    :param file_path: path to a file to be compressed.
+    :param password_length: password length
+
+    :return: new archive path (absolute/relative depends on the way `filepath` was passed) and password (None if was not
+    set to password protect)
+    """
+
     new_archive = f"{path.splitext(file_path)[0]}.zip"
-    password = random_string(archive_key_length)
+    password = random_string(password_length)
 
     pyminizip.compress(str(file_path), None, new_archive, password, 9)
 
     return new_archive, password
 
 
-def zip_folder(folder_path, archive_key_length):
+def zip_folder(folder_path: Path, password_length: tp.Optional[int]) -> (str, tp.Optional[str]):
+    """
+    `.zip`-compress a folder with optional password protection.
+
+    :param folder_path: path to a folder to be compressed.
+    :param password_length: password length
+
+    :return: new archive path (absolute/relative depends on the way `filepath` was passed) and password (None if was not
+    set to password protect)
+    """
+
     new_archive = f"{path.splitext(folder_path)[0]}.zip"
-    password = random_string(archive_key_length)
+    password = random_string(password_length)
 
     parent_folder = path.dirname(folder_path)
     absolute_path_list = []
@@ -90,7 +120,18 @@ def zip_folder(folder_path, archive_key_length):
     return new_archive, password
 
 
-def random_string(length):
+def random_string(length: tp.Optional[int]) -> tp.Optional[str]:
+    """
+    create a random string of a specified length consisting of small and capital letters, digits
+
+    :param length: string length
+
+    :return: generated string or None if None was passed
+    """
+
+    if not length:
+        return None
+
     letter_count = random.randint(0, length)
     digit_count = length - letter_count
 
@@ -98,8 +139,6 @@ def random_string(length):
     str1 += "".join((random.choice(string.digits) for x in range(digit_count)))
 
     sam_list = list(str1)  # it converts the string to list.
-    random.shuffle(
-        sam_list
-    )  # It uses a random.shuffle() function to shuffle the string.
+    random.shuffle(sam_list)  # It uses a random.shuffle() function to shuffle the string.
     final_string = "".join(sam_list)
     return final_string
