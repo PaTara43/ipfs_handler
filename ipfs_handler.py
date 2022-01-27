@@ -1,5 +1,6 @@
 import ipfshttpclient
 import pyminizip
+import secrets
 import random
 import string
 import typing as tp
@@ -157,13 +158,7 @@ def random_string(length: tp.Optional[int]) -> tp.Optional[str]:
     if not length:
         return None
 
-    letter_count = random.randint(0, length)
-    digit_count = length - letter_count
+    alphabet = string.ascii_letters + string.digits
+    password = ''.join(secrets.choice(alphabet) for i in range(length))
 
-    str1 = "".join((random.choice(string.ascii_letters) for x in range(letter_count)))
-    str1 += "".join((random.choice(string.digits) for x in range(digit_count)))
-
-    sam_list = list(str1)  # it converts the string to list.
-    random.shuffle(sam_list)  # It uses a random.shuffle() function to shuffle the string.
-    final_string = "".join(sam_list)
-    return final_string
+    return password
