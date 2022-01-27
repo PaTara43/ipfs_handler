@@ -4,7 +4,7 @@ sys.path.append("..")
 from ipfs_handler import IPFSHandler
 from test_archives import get_content_folder, get_content_single_file
 
-import ipfshttpclient
+import ipfshttpclient2
 from pathlib import Path
 
 path = Path("./testing_files/test_file.txt")
@@ -22,7 +22,7 @@ file = IPFSHandler(path, True, False)
 file_hash, gateway = file.upload_file()
 assert file_hash == "QmUphraLMyE7eJomLMiHdiWAAny1jhxW816UpGM2uTmpRA"
 assert gateway == "http://127.0.0.1:8080/ipfs/QmUphraLMyE7eJomLMiHdiWAAny1jhxW816UpGM2uTmpRA"
-client = ipfshttpclient.connect()
+client = ipfshttpclient2.connect()
 client.get(file_hash, "./testing_files")
 assert get_content_single_file(f"./testing_files/{file_hash}", None) == "abc\nabc2\nabc3"
 

@@ -1,2 +1,2 @@
-ipfshttpclient==0.7.0
+IPFS-toolkit== 0.2.2
 pyminizip==0.2.6

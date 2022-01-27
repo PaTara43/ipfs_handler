@@ -1,13 +1,15 @@
-import ipfshttpclient
+import ipfshttpclient2
 import pyminizip
 import secrets
-import random
 import string
 import typing as tp
+import warnings
 
 from ipfs_proto import IPFSProto
 from os import path, walk
 from pathlib import Path
+
+warnings.filterwarnings("ignore")
 
 
 class IPFSHandler(IPFSProto):
@@ -40,7 +42,7 @@ class IPFSHandler(IPFSProto):
         :return tuple consisting of IPFS hash and gateway link to it
         """
 
-        client: ipfshttpclient.Client = ipfshttpclient.connect()  # Connects to: /dns/localhost/tcp/5001/http
+        client: ipfshttpclient2.Client = ipfshttpclient2.connect()  # Connects to: /dns/localhost/tcp/5001/http
         file_hash: str = client.add(str(self.file_path), recursive=True)["Hash"]
         client.close()
 
@@ -57,11 +59,11 @@ class IPFSHandler(IPFSProto):
         :return success flag
         """
 
-        client: ipfshttpclient.Client = ipfshttpclient.connect()  # Connects to: /dns/localhost/tcp/5001/http
+        client: ipfshttpclient2.Client = ipfshttpclient2.connect()  # Connects to: /dns/localhost/tcp/5001/http
         try:
             client.pin.rm(file_hash)  # unpins file
             client.repo.gc()  # collects garbage (i.e. deletes unpinned)
-        except ipfshttpclient.exceptions.ErrorResponse:
+        except ipfshttpclient2.exceptions.ErrorResponse:
             return False
 
         client.close()
