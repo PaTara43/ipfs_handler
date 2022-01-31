@@ -12,6 +12,32 @@ from pathlib import Path
 warnings.filterwarnings("ignore")
 
 
+def connect_close_ipfs_client(func):  # func is a decorated IPFSHandler method
+    """
+    Decorator for working with ipfshttpclient. Opens and closes connection to local node
+
+    :param func: decorated IPFSHandler method to be executed with the opened connection
+
+    :return: wrapper function with ipfshttpclient interaction commands
+    """
+
+    def wrapper(ref):
+        """
+        Open and close connection to local IPFS node over ipfshttpclient
+
+        :param ref: Wrapped method first parameter (`self` for upload_file, `file_hash` for delete_file)
+
+        :return: result of `func`
+        """
+
+        client_decorator: ipfshttpclient2.Client = ipfshttpclient2.connect()  # Connects to /dns/localhost/tcp/5001/http
+        ipfs_interaction_result: tp.Any = func(ref, client_decorator)
+        client_decorator.close()
+        return ipfs_interaction_result
+
+    return wrapper
+
+
 class IPFSHandler(IPFSProto):
     def __init__(
         self,
@@ -35,38 +61,38 @@ class IPFSHandler(IPFSProto):
         else:
             self.file_path = file_path
 
-    def upload_file(self) -> tp.Tuple[str, str]:
+    @connect_close_ipfs_client
+    def upload_file(self, client: ipfshttpclient2.Client) -> tp.Tuple[str, str]:
         """
-        add file to local IPFS node
+        Add file to local IPFS node
+
+        :param client: ipfshttpclient ot interact with IPFS node
 
         :return tuple consisting of IPFS hash and gateway link to it
         """
 
-        client: ipfshttpclient2.Client = ipfshttpclient2.connect()  # Connects to: /dns/localhost/tcp/5001/http
         file_hash: str = client.add(str(self.file_path), recursive=True)["Hash"]
-        client.close()
-
         result: tp.Tuple[str, str] = (file_hash, f"http://127.0.0.1:8080/ipfs/{file_hash}")
         return result
 
     @staticmethod
-    def delete_file(file_hash: str) -> bool:
+    @connect_close_ipfs_client
+    def delete_file(file_hash: str, client: ipfshttpclient2.Client) -> bool:
         """
         Unpin and remove file from local node. Warning! This method collects garbage: all unpinned items will be removed
 
+        :param client: ipfshttpclient ot interact with IPFS node
         :param file_hash: IPFS file hash
 
         :return success flag
         """
 
-        client: ipfshttpclient2.Client = ipfshttpclient2.connect()  # Connects to: /dns/localhost/tcp/5001/http
         try:
             client.pin.rm(file_hash)  # unpins file
             client.repo.gc()  # collects garbage (i.e. deletes unpinned)
         except ipfshttpclient2.exceptions.ErrorResponse:
             return False
 
-        client.close()
         return True
 
     @staticmethod
@@ -161,6 +187,6 @@ def random_string(length: tp.Optional[int]) -> tp.Optional[str]:
         return None
 
     alphabet = string.ascii_letters + string.digits
-    password = ''.join(secrets.choice(alphabet) for i in range(length))
+    password = "".join(secrets.choice(alphabet) for i in range(length))
 
     return password
