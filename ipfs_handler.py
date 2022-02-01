@@ -40,11 +40,11 @@ def connect_close_ipfs_client(func):  # func is a decorated IPFSHandler method
 
 class IPFSHandler(IPFSProto):
     def __init__(
-        self,
-        file_path: Path,
-        as_archive: bool,
-        password_protect: bool = True,
-        password_length: int = 8,
+            self,
+            file_path: Path,
+            as_archive: bool,
+            password_protect: bool = True,
+            password_length: int = 8,
     ):
         """
         Class for interacting with IPFS and `.zip` archives
@@ -97,7 +97,7 @@ class IPFSHandler(IPFSProto):
 
     @staticmethod
     def create_archive(
-        file_path: Path, password_protect: bool = True, password_length: int = 8
+            file_path: Path, password_protect: bool = True, password_length: int = 8
     ) -> tp.Tuple[Path, tp.Optional[str]]:
         """
         Create an optionally password protected `.zip` file of a single file/folder.
@@ -115,78 +115,87 @@ class IPFSHandler(IPFSProto):
             raise FileNotFoundError
 
         if file_path.is_dir():
-            archive, password = zip_folder(file_path, password_length if password_protect else None)
+            with Zipper() as zipper:
+                archive, password = zipper.zip_folder(file_path, password_length if password_protect else None)
         else:
-            archive, password = zip_single_file(file_path, password_length if password_protect else None)
+            with Zipper() as zipper:
+                archive, password = zipper.zip_single_file(file_path, password_length if password_protect else None)
 
         result = (Path(archive), password)
 
         return result
 
 
-def zip_single_file(file_path: Path, password_length: tp.Optional[int]) -> (str, tp.Optional[str]):
-    """
-    `.zip`-compress a single file with optional password protection.
+class Zipper:
 
-    :param file_path: path to a file to be compressed.
-    :param password_length: password length
+    def __enter__(self):
+        return self
 
-    :return: new archive path (absolute/relative depends on the way `filepath` was passed) and password (None if was not
-    set to password protect)
-    """
+    def zip_single_file(self, file_path: Path, password_length: tp.Optional[int]) -> (str, tp.Optional[str]):
+        """
+        `.zip`-compress a single file with optional password protection.
 
-    new_archive = f"{path.splitext(file_path)[0]}.zip"
-    password = random_string(password_length)
+        :param file_path: path to a file to be compressed.
+        :param password_length: password length
 
-    pyminizip.compress(str(file_path), None, new_archive, password, 9)
+        :return: new archive path (absolute/relative depends on the way `filepath` was passed) and password (None if was not
+        set to password protect)
+        """
 
-    return new_archive, password
+        new_archive = f"{path.splitext(file_path)[0]}.zip"
+        password = self.random_string(password_length)
 
+        pyminizip.compress(str(file_path), None, new_archive, password, 9)
 
-def zip_folder(folder_path: Path, password_length: tp.Optional[int]) -> (str, tp.Optional[str]):
-    """
-    `.zip`-compress a folder with optional password protection.
+        return new_archive, password
 
-    :param folder_path: path to a folder to be compressed.
-    :param password_length: password length
+    def zip_folder(self, folder_path: Path, password_length: tp.Optional[int]) -> (str, tp.Optional[str]):
+        """
+        `.zip`-compress a folder with optional password protection.
 
-    :return: new archive path (absolute/relative depends on the way `filepath` was passed) and password (None if was not
-    set to password protect)
-    """
+        :param folder_path: path to a folder to be compressed.
+        :param password_length: password length
 
-    new_archive = f"{path.splitext(folder_path)[0]}.zip"
-    password = random_string(password_length)
+        :return: new archive path (absolute/relative depends on the way `filepath` was passed) and password (None if was not
+        set to password protect)
+        """
 
-    parent_folder = path.dirname(folder_path)
-    absolute_path_list = []
-    prefix_list = []
+        new_archive = f"{path.splitext(folder_path)[0]}.zip"
+        password = self.random_string(password_length)
 
-    contents = walk(folder_path)
-    for root, subfolders, files in contents:
-        for file_name in files:
-            absolute_path = path.join(root, file_name)
-            absolute_path_list.append(absolute_path)
-            prefix = absolute_path.replace(f"{parent_folder}/", "").replace(file_name, "")
-            prefix_list.append(prefix)
+        parent_folder = path.dirname(folder_path)
+        absolute_path_list = []
+        prefix_list = []
 
-    pyminizip.compress_multiple(absolute_path_list, prefix_list, new_archive, password, 9)
+        contents = walk(folder_path)
+        for root, subfolders, files in contents:
+            for file_name in files:
+                absolute_path = path.join(root, file_name)
+                absolute_path_list.append(absolute_path)
+                prefix = absolute_path.replace(f"{parent_folder}/", "").replace(file_name, "")
+                prefix_list.append(prefix)
 
-    return new_archive, password
+        pyminizip.compress_multiple(absolute_path_list, prefix_list, new_archive, password, 9)
 
+        return new_archive, password
 
-def random_string(length: tp.Optional[int]) -> tp.Optional[str]:
-    """
-    create a random string of a specified length consisting of small and capital letters, digits
+    @staticmethod
+    def random_string(length: tp.Optional[int]) -> tp.Optional[str]:
+        """
+        create a random string of a specified length consisting of small and capital letters, digits
 
-    :param length: string length
+        :param length: string length
 
-    :return: generated string or None if None was passed
-    """
+        :return: generated string or None if None was passed
+        """
 
-    if not length:
-        return None
+        if not length:
+            return None
 
-    alphabet = string.ascii_letters + string.digits
-    password = "".join(secrets.choice(alphabet) for i in range(length))
+        alphabet = string.ascii_letters + string.digits
+        password = "".join(secrets.choice(alphabet) for i in range(length))
 
-    return password
+        return password
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        return False
