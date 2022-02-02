@@ -18,8 +18,7 @@ def test_archive_folder_no_pwd():
     assert unarchive_get_content_folder(archive.file_path, password) == "acb\nacb1\nacb2"
 
 
-@pytest.mark.parametrize("as_archive, password_protect, password_length",
-                         [(True, True, 8), (True, True, 24)])
+@pytest.mark.parametrize("as_archive, password_protect, password_length", [(True, True, 8), (True, True, 24)])
 def test_archived_folder_pwd(as_archive, password_protect, password_length):
     archive = IPFSHandler(path_folder, as_archive, password_protect, password_length)
     password = archive.password

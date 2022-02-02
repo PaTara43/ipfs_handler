@@ -18,8 +18,7 @@ def test_archive_file_no_pwd():
     assert unarchive_get_content_single_file(archive.file_path, password) == "abc\nabc2\nabc3"
 
 
-@pytest.mark.parametrize("as_archive, password_protect, password_length",
-                         [(True, True, 8), (True, True, 24)])
+@pytest.mark.parametrize("as_archive, password_protect, password_length", [(True, True, 8), (True, True, 24)])
 def test_archived_file_pwd(as_archive, password_protect, password_length):
     archive = IPFSHandler(path_file, as_archive, password_protect, password_length)
     password = archive.password
