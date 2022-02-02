@@ -12,7 +12,7 @@ from pathlib import Path
 warnings.filterwarnings("ignore")
 
 
-def connect_close_ipfs_client(func):  # func is a decorated IPFSHandler method
+def connect_close_ipfs_client(func):
     """
     Decorator for working with ipfshttpclient. Opens and closes connection to local node
 
@@ -71,7 +71,10 @@ class IPFSHandler(IPFSProto):
         :return tuple consisting of IPFS hash and gateway link to it
         """
 
-        file_hash: str = client.add(str(self.file_path), recursive=True)["Hash"]
+        if self.file_path.is_dir():
+            file_hash: str = client.add(str(self.file_path), recursive=True)[-1]["Hash"]
+        else:
+            file_hash: str = client.add(str(self.file_path), recursive=True)["Hash"]
         result: tp.Tuple[str, str] = (file_hash, f"http://127.0.0.1:8080/ipfs/{file_hash}")
         return result
 
@@ -88,7 +91,7 @@ class IPFSHandler(IPFSProto):
         """
 
         try:
-            client.pin.rm(file_hash)  # unpins file
+            client.pin.rm(file_hash, recursive=True)  # unpins file
             client.repo.gc()  # collects garbage (i.e. deletes unpinned)
         except ipfshttpclient2.exceptions.ErrorResponse:
             return False
@@ -138,8 +141,8 @@ class Zipper:
         :param file_path: path to a file to be compressed.
         :param password_length: password length
 
-        :return: new archive path (absolute/relative depends on the way `filepath` was passed) and password (None if was not
-        set to password protect)
+        :return: new archive path (absolute/relative depends on the way `filepath` was passed) and password (None if was
+        not set to password protect)
         """
 
         new_archive = f"{path.splitext(file_path)[0]}.zip"
@@ -156,8 +159,8 @@ class Zipper:
         :param folder_path: path to a folder to be compressed.
         :param password_length: password length
 
-        :return: new archive path (absolute/relative depends on the way `filepath` was passed) and password (None if was not
-        set to password protect)
+        :return: new archive path (absolute/relative depends on the way `filepath` was passed) and password (None if was
+        not set to password protect)
         """
 
         new_archive = f"{path.splitext(folder_path)[0]}.zip"
