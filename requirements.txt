@@ -1,3 +1,5 @@
 IPFS-toolkit== 0.2.2
 pyminizip==0.2.6
 pytest~=7.0.0
+PyYAML==6.0
+lark==1.1.1
