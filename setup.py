@@ -14,4 +14,4 @@ setup(name='ipfs_handler',
                         'pytest~=7.0.0',
                         'PyYAML==6.0',
                         'lark==1.1.1']
-     )
+      )
