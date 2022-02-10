@@ -1,6 +1,6 @@
 import pytest
 
-from src.ipfs_handler import IPFSHandler
+from ipfs_handler.base import IPFSHandler
 from tests.conftest import path_file, path_folder, unarchive_get_content_single_file, unarchive_get_content_folder
 
 import ipfshttpclient2
