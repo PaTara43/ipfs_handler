@@ -1,7 +1,7 @@
 import pytest
 
 from tests.conftest import path_file, unarchive_get_content_single_file
-from ipfs_handler import IPFSHandler
+from src.ipfs_handler import IPFSHandler
 
 
 def test_unarchived_file():

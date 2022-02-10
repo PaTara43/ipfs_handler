@@ -5,7 +5,7 @@ import string
 import typing as tp
 import warnings
 
-from ipfs_proto import IPFSProto
+from .ipfs_proto import IPFSProto
 from os import path, walk
 from pathlib import Path
 
