@@ -13,5 +13,6 @@ setup(name='ipfs_handler',
                         'pyminizip==0.2.6',
                         'pytest~=7.0.0',
                         'PyYAML==6.0',
-                        'lark==1.1.1']
+                        'lark==1.1.1',
+                        'requests>=2.27.1']
       )
